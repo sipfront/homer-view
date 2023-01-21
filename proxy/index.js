@@ -19,6 +19,14 @@ var _config_ = require("./config");
 if (process.argv.indexOf("-c") != -1) {
     _config_ = require(process.argv[process.argv.indexOf("-c") + 1]);
 }
+if (process.env.HOMER_API_URL)
+    _config_.apiUrl = process.env.HOMER_API_URL;
+if (process.env.HOMER_API_SESS)
+    _config_.apiSess = process.env.HOMER_API_SESS;
+if (process.env.HOMER_API_USER)
+    _config_.apiUrl = process.env.HOMER_API_USER;
+if (process.env.HOMER_API_PASS)
+    _config_.apiUrl = process.env.HOMER_API_PASS;
 
 
 var debug = _config_.debug || false;
