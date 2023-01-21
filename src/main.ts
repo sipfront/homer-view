@@ -10,9 +10,8 @@ if (environment.production) {
   enableProdMode();
 }
 
-fetch('proxyconfig.json').then(res => res.json()).then((resp) => {
-    console.log(res);
-    console.log(resp);
+fetch('/proxyconfig.json').then(res => res.json()).then((resp) => {
+    environment.apiUrl = resp.apiUrl;
     platformBrowserDynamic().bootstrapModule(AppModule)
     .catch(err => console.error(err));
 }).catch(err => console.error(err));
