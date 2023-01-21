@@ -104,15 +104,17 @@ var getAuthJWT = function() {
     }, function(error, response, body) {
         if (!body) {
             _log('API Error connecting to ' + apiUrl);
-            _log('Exiting...', error);
-            process.exit(1);
+            return;
+            //_log('Exiting...', error);
+            //process.exit(1);
         } else {
             _log(response.statusCode, body);
             if (response.statusCode == 200 || response.statusCode == 201) {
                 var token = body.token;
                 if (!token) {
-                    _log('API Auth Failure!', token);
-                    process.exit(1);
+                    //_log('API Auth Failure!', token);
+                    //process.exit(1);
+                    return;
                 }
                 authCache = true;
                 _log('new token: ', token);
