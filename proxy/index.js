@@ -145,6 +145,14 @@ var http = require('http'),
     httpProxy = require('http-proxy');
 var proxy = httpProxy.createProxyServer({});
 
+proxy.on('error', function (err, req, res) {
+    _err("Failed to proxy event to API: " + err);
+    res.writeHead(500, {
+        'Content-Type': 'application/json'
+    });
+    res.end('{"error":"something went wrong"}');
+});
+
 proxy.on('proxyReq', function(proxyReq, req, res, options) {
     proxyReq.setHeader("Access-Control-Allow-Origin", "*"); // allow requests from any other server
     proxyReq.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
