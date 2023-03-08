@@ -82,27 +82,22 @@ export class AppComponent implements OnInit {
         const localData = {
             protocol_id: this.getParams.protocol_id || '1_call'
         };
-        const callid = this.getParams.callid || '';
-        let callids = [];
-        if (callid.split(',').length > 0) {
-            callids = callid.split(',');
-        } else {
-            callids = [callid];
-        }
+
+        const correlation_id = this.getParams.corrid || '';
+
         const search = {};
-        search[localData.protocol_id] = {
-            id: this.getParams.id * 1,
-            callid: callids,
-            uuid: []
-        };
         const query: any = {
             param: {
-                transaction: {
-                    call: localData.protocol_id === '1_call',
-                    registration: localData.protocol_id === '1_registration',
-                    rest: localData.protocol_id === '1_default'
+                transaction: {},
+                search: {
+                    1_call: [{
+                        name: "protocol_header.correlation_id",
+                        value: correlation_id,
+                        func: null,
+                        type: "string",
+                        hepid: 1
+                    }]
                 },
-                search,
                 location: {},
                 timezone: {
                     value: -180,
@@ -110,8 +105,9 @@ export class AppComponent implements OnInit {
                 }
             },
             timestamp: {
-                from: this.getParams.from * 1 || 1574632800000,
-                to: this.getParams.to * 1 || 1577224799000
+                // 24h back
+                from: this.getParams.from * 1 || (Date.now() - (24 * 3600 * 1000)),
+                to: this.getParams.to * 1 || Date.now()
             }
         };
         if (isQOS) {
