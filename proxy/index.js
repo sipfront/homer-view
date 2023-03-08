@@ -26,6 +26,9 @@ var debug = _config_.debug || false;
 function _log (/** arguments */) {
     if (debug) console.log.apply(this, arguments);
 }
+function _err (/** arguments */) {
+    console.log.apply(this, arguments);
+}
 
 _log(_config_)
 
@@ -59,16 +62,18 @@ var getAuthCookie = function(setCookie) {
         jar: jar
     }, function(error, response, body) {
         if (!body) {
-            _log('API Error connecting to ' + apiUrl);
-            _log('Exiting...', error);
-            process.exit(1);
+            _err('API Error connecting to ' + apiUrl);
+            //_log('Exiting...', error);
+            //process.exit(1);
+            return;
         } else {
             _log(body);
             if (response.statusCode == 200) {
                 var status = JSON.parse(body).auth;
                 if (!status || status != true) {
-                    _log('API Auth Failure!', status);
-                    process.exit(1);
+                    _err('API Auth Failure!', status);
+                    //process.exit(1);
+                    return;
                 }
                 authCache = true;
             }
@@ -103,16 +108,18 @@ var getAuthJWT = function() {
         jar: jar
     }, function(error, response, body) {
         if (!body) {
-            _log('API Error connecting to ' + apiUrl);
-            _log('Exiting...', error);
-            process.exit(1);
+            _err('API Error connecting to ' + apiUrl);
+            //_log('Exiting...', error);
+            //process.exit(1);
+            return;
         } else {
             _log(response.statusCode, body);
             if (response.statusCode == 200 || response.statusCode == 201) {
                 var token = body.token;
                 if (!token) {
-                    _log('API Auth Failure!', token);
-                    process.exit(1);
+                    _err('API Auth Failure!', token);
+                    //process.exit(1);
+                    return;
                 }
                 authCache = true;
                 _log('new token: ', token);
@@ -138,6 +145,14 @@ var http = require('http'),
     httpProxy = require('http-proxy');
 var proxy = httpProxy.createProxyServer({});
 
+proxy.on('error', function (err, req, res) {
+    _err("Failed to proxy event to API: " + err);
+    res.writeHead(500, {
+        'Content-Type': 'application/json'
+    });
+    res.end('{"error":"something went wrong"}');
+});
+
 proxy.on('proxyReq', function(proxyReq, req, res, options) {
     proxyReq.setHeader("Access-Control-Allow-Origin", "*"); // allow requests from any other server
     proxyReq.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
@@ -158,11 +173,11 @@ var server = http.createServer(function(req, res) {
     res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Authorization");
 
     if (req.method === 'OPTIONS') {
-        console.log('OPTIONS')
+        _log('OPTIONS')
         res.writeHead(200);
         res.end();
     } else {
-        console.log('[PROXY]')
+        _log('[PROXY]')
         proxy.web(req, res, {
             target: apiUrl
         });
@@ -178,6 +193,6 @@ setInterval (function(){
 }, 1000)
 
 
-console.log("HOMER Proxy listening on port " + _config_.proxyPort)
+_log("HOMER Proxy listening on port " + _config_.proxyPort)
 server.listen(_config_.proxyPort);
 
